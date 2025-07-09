@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Audacity Light Demo</title>
+  <link rel="stylesheet" href="https://unpkg.com/waveform-playlist@4.3.3/styles/playlist.css">
+  <script src="https://kit.fontawesome.com/ef69927139.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div>
+    <input type="file" id="file-input" accept="audio/mpeg" />
+    <button id="btn-play" title="Play"><i class="fas fa-play"></i></button>
+    <button id="btn-pause" title="Pause"><i class="fas fa-pause"></i></button>
+    <button id="btn-zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
+    <button id="btn-zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
+    Start: <input id="start" size="10" readonly>
+    End: <input id="end" size="10" readonly>
+  </div>
+  <div id="playlist"></div>
+  <script src="https://unpkg.com/waveform-playlist@4.3.3/build/waveform-playlist.var.min.js"></script>
+  <script>
+    var playlist = WaveformPlaylist.init({
+      container: document.getElementById("playlist"),
+      timescale: true,
+      state: 'select',
+      samplesPerPixel: 1000,
+      zoomLevels: [1000, 2000, 4000],
+      controls: {
+        show: true
+      }
+    });
+
+    var ee = playlist.getEventEmitter();
+
+    document.getElementById('file-input').addEventListener('change', function(e) {
+      var files = e.target.files;
+      if (files.length) {
+        ee.emit('newtrack', files[0]);
+      }
+    });
+
+    document.getElementById('btn-play').addEventListener('click', function() {
+      ee.emit('play');
+    });
+
+    document.getElementById('btn-pause').addEventListener('click', function() {
+      ee.emit('pause');
+    });
+
+    document.getElementById('btn-zoom-in').addEventListener('click', function() {
+      ee.emit('zoomin');
+    });
+
+    document.getElementById('btn-zoom-out').addEventListener('click', function() {
+      ee.emit('zoomout');
+    });
+
+    function formatTime(seconds) {
+      var s = Math.floor(seconds % 60).toString().padStart(2, '0');
+      var m = Math.floor(seconds / 60).toString().padStart(2, '0');
+      var ms = Math.floor((seconds % 1) * 1000).toString().padStart(3, '0');
+      return m + ':' + s + '.' + ms;
+    }
+
+    ee.on('select', function(start, end) {
+      document.getElementById('start').value = formatTime(start);
+      document.getElementById('end').value = formatTime(end);
+    });
+  </script>
+</body>
+</html>
